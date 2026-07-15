@@ -1,113 +1,73 @@
 import { useEffect, useRef } from "react";
 
-type Particle = {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  life: number;
-  maxLife: number;
-  size: number;
-  hue: number;
-};
-
+/**
+ * Soft cursor spotlight, à la Antigravity — a large, eased radial glow
+ * that follows the mouse and gently lights the background.
+ */
 export function CursorTrail() {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const glowRef = useRef<HTMLDivElement | null>(null);
+  const auraRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    const glow = glowRef.current;
+    const aura = auraRef.current;
+    if (!glow || !aura) return;
 
-    let width = (canvas.width = window.innerWidth);
-    let height = (canvas.height = window.innerHeight);
-
-    const particles: Particle[] = [];
-    let lastX = 0;
-    let lastY = 0;
-    let lastTime = 0;
-
-    const onResize = () => {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-    };
-
-    const spawn = (x: number, y: number, count: number) => {
-      for (let i = 0; i < count; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const speed = 0.3 + Math.random() * 1.2;
-        particles.push({
-          x,
-          y,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed - 0.3,
-          life: 0,
-          maxLife: 60 + Math.random() * 40,
-          size: 1 + Math.random() * 2.2,
-          hue: 40 + Math.random() * 30,
-        });
-      }
-    };
+    let targetX = window.innerWidth / 2;
+    let targetY = window.innerHeight / 2;
+    let x = targetX;
+    let y = targetY;
+    let auraX = targetX;
+    let auraY = targetY;
 
     const onMove = (e: MouseEvent) => {
-      const now = performance.now();
-      const dx = e.clientX - lastX;
-      const dy = e.clientY - lastY;
-      const dist = Math.hypot(dx, dy);
-      if (now - lastTime < 16 && dist < 4) return;
-      const count = Math.min(4, 1 + Math.floor(dist / 20));
-      spawn(e.clientX, e.clientY, count);
-      lastX = e.clientX;
-      lastY = e.clientY;
-      lastTime = now;
+      targetX = e.clientX;
+      targetY = e.clientY;
     };
 
     let raf = 0;
-    const render = () => {
-      ctx.clearRect(0, 0, width, height);
-      for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i];
-        p.life++;
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy -= 0.008;
-        p.vx *= 0.985;
-        const t = p.life / p.maxLife;
-        if (t >= 1) {
-          particles.splice(i, 1);
-          continue;
-        }
-        const alpha = (1 - t) * 0.85;
-        const size = p.size * (1 - t * 0.5);
-        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, size * 6);
-        grad.addColorStop(0, `hsla(${p.hue}, 85%, 70%, ${alpha})`);
-        grad.addColorStop(0.4, `hsla(${p.hue}, 75%, 55%, ${alpha * 0.4})`);
-        grad.addColorStop(1, `hsla(${p.hue}, 70%, 40%, 0)`);
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, size * 6, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      raf = requestAnimationFrame(render);
+    const tick = () => {
+      // Tight glow follows quickly
+      x += (targetX - x) * 0.18;
+      y += (targetY - y) * 0.18;
+      // Ambient aura drifts more slowly for a layered feel
+      auraX += (targetX - auraX) * 0.06;
+      auraY += (targetY - auraY) * 0.06;
+
+      glow.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%)`;
+      aura.style.transform = `translate3d(${auraX}px, ${auraY}px, 0) translate(-50%, -50%)`;
+      raf = requestAnimationFrame(tick);
     };
 
-    window.addEventListener("resize", onResize);
-    window.addEventListener("mousemove", onMove);
-    raf = requestAnimationFrame(render);
+    window.addEventListener("mousemove", onMove, { passive: true });
+    raf = requestAnimationFrame(tick);
 
     return () => {
       cancelAnimationFrame(raf);
-      window.removeEventListener("resize", onResize);
       window.removeEventListener("mousemove", onMove);
     };
   }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="pointer-events-none fixed inset-0 z-50"
-      aria-hidden="true"
-    />
+    <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+      {/* Large ambient aura — subtle, colors the background */}
+      <div
+        ref={auraRef}
+        className="absolute left-0 top-0 h-[900px] w-[900px] rounded-full opacity-60 mix-blend-screen blur-3xl"
+        style={{
+          background:
+            "radial-gradient(circle, oklch(0.62 0.14 75 / 0.28) 0%, oklch(0.62 0.14 75 / 0.10) 30%, transparent 65%)",
+        }}
+      />
+      {/* Tighter, brighter core glow */}
+      <div
+        ref={glowRef}
+        className="absolute left-0 top-0 h-[380px] w-[380px] rounded-full opacity-80 mix-blend-screen blur-2xl"
+        style={{
+          background:
+            "radial-gradient(circle, oklch(0.88 0.09 88 / 0.45) 0%, oklch(0.82 0.13 85 / 0.20) 35%, transparent 70%)",
+        }}
+      />
+    </div>
   );
 }
