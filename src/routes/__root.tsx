@@ -87,10 +87,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "Layer Cake AI — AI Automation for Modern Businesses" },
       {
         property: "og:description",
-        content: "Automate leads, bookings, email, and marketing with Layer Cake AI.",
+        content: "Layer Cake AI builds intelligent automation — lead generation, booking CRMs, email flows, marketing campaigns, and SEO — so your business runs itself.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Layer Cake AI — AI Automation for Modern Businesses" },
+      { name: "twitter:description", content: "Layer Cake AI builds intelligent automation — lead generation, booking CRMs, email flows, marketing campaigns, and SEO — so your business runs itself." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/44478b2c-da07-4ffd-b9d2-b26f5ef88255/id-preview-d9e48c5c--4053e8b0-336a-4adf-b780-6d5e51525a88.lovable.app-1784139281259.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/44478b2c-da07-4ffd-b9d2-b26f5ef88255/id-preview-d9e48c5c--4053e8b0-336a-4adf-b780-6d5e51525a88.lovable.app-1784139281259.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
