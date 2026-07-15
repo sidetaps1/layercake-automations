@@ -264,7 +264,7 @@ function LandingPage() {
 
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <CTAButton href={`tel:${PHONE_TEL}`}>Book a Call</CTAButton>
-              <CTAButton href="mailto:hello@layercakehq.com" variant="outline">
+              <CTAButton href="mailto:owner@layercakehq.com" variant="outline">
                 Send an Email
               </CTAButton>
             </div>
@@ -280,8 +280,8 @@ function LandingPage() {
               <div className="flex flex-col items-center gap-2">
                 <Mail className="h-4 w-4 text-gold" />
                 <span className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Email</span>
-                <a href="mailto:hello@layercakehq.com" className="text-gold-soft hover:text-gold">
-                  hello@layercakehq.com
+                <a href="mailto:owner@layercakehq.com" className="text-gold-soft hover:text-gold">
+                  owner@layercakehq.com
                 </a>
               </div>
               <div className="flex flex-col items-center gap-2">
