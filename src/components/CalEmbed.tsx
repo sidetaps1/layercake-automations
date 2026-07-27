@@ -71,10 +71,10 @@ export function CalEmbed() {
   }, []);
 
   return (
-    <div className="w-full overflow-hidden rounded-xl border border-gold/30 bg-card/80 p-4 shadow-2xl backdrop-blur min-h-[700px]">
+    <div className="w-full rounded-xl border border-gold/30 bg-card/80 shadow-2xl backdrop-blur overflow-x-hidden">
       <div
         id="my-cal-inline-30min"
-        className="w-full h-full min-h-[650px] overflow-scroll"
+        style={{ width: "100%", height: "100%", minHeight: "600px", overflowY: "auto", overflowX: "hidden" }}
       />
     </div>
   );

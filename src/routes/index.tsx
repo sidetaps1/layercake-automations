@@ -240,8 +240,8 @@ function LandingPage() {
       </section>
 
       {/* Contact / Final CTA */}
-      <section id="contact" className="relative z-10 mx-auto max-w-5xl px-6 py-24">
-        <div className="deco-corners relative overflow-hidden rounded-lg border border-gold/40 bg-card/50 p-10 backdrop-blur md:p-16">
+      <section id="contact" className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 py-16 sm:py-24 overflow-x-hidden">
+        <div className="deco-corners relative rounded-lg border border-gold/40 bg-card/50 backdrop-blur overflow-hidden">
           <div className="deco-corner-tl" />
           <div className="deco-corner-tr" />
           <div className="deco-corner-bl" />
@@ -253,28 +253,32 @@ function LandingPage() {
             style={{ background: "var(--gradient-radial)" }}
           />
 
-          <div className="relative text-center">
+          {/* Header — centered text block */}
+          <div className="relative text-center px-5 pt-8 sm:pt-12 sm:px-10 md:px-16">
             <p className="mb-4 text-xs uppercase tracking-[0.4em] text-gold">— Let's talk —</p>
-            <h2 className="font-display text-4xl md:text-6xl">
+            <h2 className="font-display text-3xl sm:text-4xl md:text-6xl">
               Ready to <span className="text-gradient-gold italic">automate?</span>
             </h2>
-            <p className="mx-auto mt-6 max-w-xl text-muted-foreground">
+            <p className="mx-auto mt-6 max-w-xl text-muted-foreground text-sm sm:text-base">
               Book a discovery call and we'll map out an automation blueprint tailored to your
               business — no fluff, just leverage.
             </p>
+          </div>
 
-            <div className="mt-10 mb-12">
-              <CalEmbed />
-            </div>
+          {/* Cal.com embed — full-width, no side padding on mobile */}
+          <div className="relative mt-8 px-3 sm:px-6 md:px-10">
+            <CalEmbed />
+          </div>
 
+          {/* CTA buttons + contact info */}
+          <div className="relative px-5 pb-8 pt-6 sm:px-10 sm:pb-12 md:px-16 text-center">
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <CTAButton href="#contact">Book a Call</CTAButton>
               <CTAButton href="mailto:owner@layercakehq.com" variant="outline">
                 Send an Email
               </CTAButton>
             </div>
 
-            <div className="mt-12 grid gap-6 border-t border-gold/20 pt-8 text-sm sm:grid-cols-3">
+            <div className="mt-10 grid gap-6 border-t border-gold/20 pt-8 text-sm sm:grid-cols-3">
               <div className="flex flex-col items-center gap-2">
                 <Phone className="h-4 w-4 text-gold" />
                 <span className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Phone</span>
