@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { CursorTrail } from "@/components/CursorTrail";
+import { CalEmbed } from "@/components/CalEmbed";
 import {
   Sparkles,
   Target,
@@ -262,8 +263,12 @@ function LandingPage() {
               business — no fluff, just leverage.
             </p>
 
-            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <CTAButton href={`tel:${PHONE_TEL}`}>Book a Call</CTAButton>
+            <div className="mt-10 mb-12">
+              <CalEmbed />
+            </div>
+
+            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <CTAButton href="#contact">Book a Call</CTAButton>
               <CTAButton href="mailto:owner@layercakehq.com" variant="outline">
                 Send an Email
               </CTAButton>
