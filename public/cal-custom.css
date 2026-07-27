@@ -1,0 +1,16 @@
+/* Hide Cal.com white-label branding */
+a[href*="cal.com"],
+[class*="powered"],
+[class*="branding"],
+[data-testid="cal-branding"],
+[data-testid="powered-by-cal"],
+div:has(> a[href*="cal.com"]),
+.cal-embed-footer,
+footer.cal-footer {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}

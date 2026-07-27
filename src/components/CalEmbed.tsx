@@ -54,11 +54,19 @@ export function CalEmbed() {
           theme: "dark",
         },
         calLink: "matt-m-l3939q/30min",
+        cssVarsPerTheme: {
+          dark: {
+            "cal-brand": "#c5a059",
+            "cal-text-emphasis": "#ffffff",
+            "cal-text-muted": "#a0a0a0",
+          },
+        },
       });
 
       window.Cal.ns["30min"]("ui", {
         hideEventTypeDetails: false,
         layout: "month_view",
+        css: "https://layercakehq.com/cal-custom.css",
         cssVarsPerTheme: {
           dark: {
             "cal-brand": "#c5a059",
