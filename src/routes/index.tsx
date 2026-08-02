@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { CursorTrail } from "@/components/CursorTrail";
 import { CalEmbed } from "@/components/CalEmbed";
+import { RoiCalculator } from "@/components/RoiCalculator";
 import {
   Sparkles,
   Target,
@@ -54,11 +55,12 @@ const services = [
   },
 ];
 
-function DecoDivider({ label }: { label?: string }) {
+function DecoDivider({ label, isH2 }: { label?: string; isH2?: boolean }) {
+  const TextTag = isH2 ? "h2" : "span";
   return (
     <div className="flex items-center justify-center gap-4 text-gold">
       <span className="h-px w-16 bg-gradient-to-r from-transparent to-gold/60" />
-      <span className="text-xs uppercase tracking-[0.4em] text-gold-soft">{label ?? "◈"}</span>
+      <TextTag className="text-xs uppercase tracking-[0.4em] text-gold-soft">{label ?? "◈"}</TextTag>
       <span className="h-px w-16 bg-gradient-to-l from-transparent to-gold/60" />
     </div>
   );
@@ -177,10 +179,10 @@ function LandingPage() {
       {/* Services */}
       <section id="services" className="relative z-10 mx-auto max-w-7xl px-6 py-20">
         <div className="mb-16 text-center">
-          <p className="mb-4 text-xs uppercase tracking-[0.4em] text-gold">— Our Services —</p>
-          <h2 className="font-display text-4xl md:text-6xl">
+          <h2 className="mb-4 text-xs uppercase tracking-[0.4em] text-gold">— Services —</h2>
+          <p className="font-display text-4xl md:text-6xl">
             Built for <span className="text-gradient-gold italic">growth.</span>
-          </h2>
+          </p>
           <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
             Six precision-engineered systems working in concert to compound your revenue.
           </p>
@@ -212,14 +214,14 @@ function LandingPage() {
 
       {/* About */}
       <section id="about" className="relative z-10 mx-auto max-w-5xl px-6 py-24">
-        <DecoDivider label="About" />
+        <DecoDivider label="About" isH2 />
         <div className="mt-12 grid gap-12 md:grid-cols-5">
           <div className="md:col-span-2">
-            <h2 className="font-display text-4xl md:text-5xl leading-tight">
+            <p className="font-display text-4xl md:text-5xl leading-tight">
               Intelligence,
               <br />
               <span className="text-gradient-gold italic">layered.</span>
-            </h2>
+            </p>
           </div>
           <div className="md:col-span-3 space-y-5 text-muted-foreground">
             <p className="text-lg leading-relaxed">
@@ -239,6 +241,11 @@ function LandingPage() {
         </div>
       </section>
 
+      {/* ROI Calculator */}
+      <section id="calculator" className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 py-12">
+        <RoiCalculator />
+      </section>
+
       {/* Contact / Final CTA */}
       <section id="contact" className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 py-16 sm:py-24 overflow-x-hidden">
         <div className="deco-corners relative rounded-lg border border-gold/40 bg-card/50 backdrop-blur overflow-hidden">
@@ -255,10 +262,10 @@ function LandingPage() {
 
           {/* Header — centered text block */}
           <div className="relative text-center px-5 pt-8 sm:pt-12 sm:px-10 md:px-16">
-            <p className="mb-4 text-xs uppercase tracking-[0.4em] text-gold">— Let's talk —</p>
-            <h2 className="font-display text-3xl sm:text-4xl md:text-6xl">
+            <h2 className="mb-4 text-xs uppercase tracking-[0.4em] text-gold">— Contact —</h2>
+            <p className="font-display text-3xl sm:text-4xl md:text-6xl">
               Ready to <span className="text-gradient-gold italic">automate?</span>
-            </h2>
+            </p>
             <p className="mx-auto mt-6 max-w-xl text-muted-foreground text-sm sm:text-base">
               Book a discovery call and we'll map out an automation blueprint tailored to your
               business — no fluff, just leverage.
@@ -273,8 +280,8 @@ function LandingPage() {
           {/* CTA buttons + contact info */}
           <div className="relative px-5 pb-8 pt-6 sm:px-10 sm:pb-12 md:px-16 text-center">
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <CTAButton href="mailto:owner@layercakehq.com" variant="outline">
-                Send an Email
+              <CTAButton href="#contact">
+                Book a Call
               </CTAButton>
             </div>
 
