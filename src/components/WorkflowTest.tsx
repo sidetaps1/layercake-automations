@@ -17,18 +17,17 @@ export function WorkflowTest() {
   useEffect(() => {
     if (status === "processing") {
       const interval = setInterval(() => {
-        setProgress((prev) => {
-          if (prev >= 100) {
-            clearInterval(interval);
-            setStatus("complete");
-            return 100;
-          }
-          return prev + 10;
-        });
+        setProgress((prev) => (prev >= 100 ? 100 : prev + 10));
       }, 150);
       return () => clearInterval(interval);
     }
   }, [status]);
+
+  useEffect(() => {
+    if (status === "processing" && progress >= 100) {
+      setStatus("complete");
+    }
+  }, [status, progress]);
 
   const reset = () => {
     setSelected(null);
