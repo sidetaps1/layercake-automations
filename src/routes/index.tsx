@@ -2,6 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { CursorTrail } from "@/components/CursorTrail";
 import { CalEmbed } from "@/components/CalEmbed";
 import { RoiCalculator } from "@/components/RoiCalculator";
+import { WorkflowTest } from "@/components/WorkflowTest";
+import { CaseStudies } from "@/components/CaseStudies";
+import { ChatWidget } from "@/components/ChatWidget";
 import {
   Sparkles,
   Target,
@@ -176,6 +179,11 @@ function LandingPage() {
         </div>
       </section>
 
+      {/* Workflow Tester */}
+      <section id="workflow-test" className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 pb-20">
+        <WorkflowTest />
+      </section>
+
       {/* Services */}
       <section id="services" className="relative z-10 mx-auto max-w-7xl px-6 py-20">
         <div className="mb-16 text-center">
@@ -241,6 +249,11 @@ function LandingPage() {
         </div>
       </section>
 
+      {/* Case Studies */}
+      <section id="case-studies" className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 py-24">
+        <CaseStudies />
+      </section>
+
       {/* ROI Calculator */}
       <section id="calculator" className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 py-12">
         <RoiCalculator />
@@ -295,9 +308,9 @@ function LandingPage() {
               </div>
               <div className="flex flex-col items-center gap-2">
                 <Mail className="h-4 w-4 text-gold" />
-                <span className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Email</span>
-                <a href="mailto:owner@layercakehq.com" className="text-gold-soft hover:text-gold">
-                  owner@layercakehq.com
+                <span className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Book</span>
+                <a href="#contact" className="text-gold-soft hover:text-gold">
+                  Directly on Calendar
                 </a>
               </div>
               <div className="flex flex-col items-center gap-2">
@@ -325,6 +338,7 @@ function LandingPage() {
           </p>
         </div>
       </footer>
+      <ChatWidget />
     </div>
   );
 }
