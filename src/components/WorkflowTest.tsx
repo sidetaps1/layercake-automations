@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Play, CheckCircle2, RotateCcw, Mail, Loader2, Target, CalendarCheck, Database } from "lucide-react";
+import { Play, CheckCircle2, RotateCcw, Mail, Loader2, Target, CalendarCheck, Database, ArrowRight } from "lucide-react";
 
 type Bottleneck = "leads" | "followups" | "scheduling";
 
