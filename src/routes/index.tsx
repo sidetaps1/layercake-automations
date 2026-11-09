@@ -5,6 +5,8 @@ import { RoiCalculator } from "@/components/RoiCalculator";
 import { WorkflowTest } from "@/components/WorkflowTest";
 import { CaseStudies } from "@/components/CaseStudies";
 import { ChatWidget } from "@/components/ChatWidget";
+import { SystemSelectorQuiz } from "@/components/SystemSelectorQuiz";
+import { ObjectionAccordion } from "@/components/ObjectionAccordion";
 import {
   Sparkles,
   Target,
@@ -349,6 +351,24 @@ function LandingPage() {
   const activeSection = useActiveNav();
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  // Dynamic hero value word rotator
+  const rotatingWords = ["Refined.", "Scaled.", "Optimized.", "Accelerated."];
+  const [wordIndex, setWordIndex] = useState(0);
+  const [isFading, setIsFading] = useState(false);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const interval = setInterval(() => {
+      setIsFading(true);
+      setTimeout(() => {
+        setWordIndex((prev) => (prev + 1) % rotatingWords.length);
+        setIsFading(false);
+      }, 280);
+    }, 2800);
+
+    return () => clearInterval(interval);
+  }, [rotatingWords.length]);
+
   const heroRef = useRef<HTMLElement | null>(null);
   const heroTextRef = useRef<HTMLDivElement | null>(null);
 
@@ -594,15 +614,17 @@ function LandingPage() {
             >
               <span className="block text-[#F4F4F5]">Automation,</span>
               <span
-                className="block"
+                className="inline-block transition-all duration-300 ease-out"
                 style={{
                   background: "linear-gradient(135deg, #7C5CFF 0%, #4F8CFF 50%, #A98BFF 100%)",
                   backgroundClip: "text",
                   WebkitBackgroundClip: "text",
                   color: "transparent",
+                  opacity: isFading ? 0 : 1,
+                  transform: isFading ? "translateY(8px)" : "translateY(0px)",
                 }}
               >
-                Refined.
+                {rotatingWords[wordIndex]}
               </span>
             </h1>
 
@@ -794,6 +816,14 @@ function LandingPage() {
         </div>
       </section>
 
+      {/* ── System Selector Quiz ── */}
+      <section
+        id="diagnostic"
+        className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 py-16"
+      >
+        <SystemSelectorQuiz />
+      </section>
+
       {/* ── Case Studies ── */}
       <section
         id="case-studies"
@@ -808,6 +838,14 @@ function LandingPage() {
         className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 py-16"
       >
         <RoiCalculator />
+      </section>
+
+      {/* ── Objection Accordion (FAQ) ── */}
+      <section
+        id="faq"
+        className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 py-16"
+      >
+        <ObjectionAccordion />
       </section>
 
       {/* ── Contact ── */}
