@@ -15,8 +15,12 @@ import {
   Database,
   Phone,
   ArrowRight,
+  Video,
+  Menu,
+  X,
   MapPin,
 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
@@ -30,314 +34,929 @@ const services = [
     icon: Target,
     title: "Lead Generation",
     desc: "AI-driven prospecting that finds, qualifies, and delivers customers directly to your pipeline.",
+    featured: true,
   },
   {
     icon: Database,
     title: "Booking CRM",
     desc: "A backend command center that tracks every contact, deal, and conversation without lifting a finger.",
+    featured: false,
   },
   {
     icon: CalendarCheck,
     title: "Calendar Bookings",
     desc: "Automated scheduling that syncs across your team and books qualified calls while you sleep.",
+    featured: false,
   },
   {
     icon: Mail,
     title: "Email Automation",
     desc: "Personalized backend sequences that nurture leads and close deals on autopilot.",
+    featured: false,
   },
   {
     icon: Megaphone,
     title: "Marketing Campaigns",
     desc: "End-to-end campaign engines — from creative to conversion — built on data, not guesswork.",
+    featured: false,
   },
   {
     icon: Search,
     title: "Website Engine Optimization",
     desc: "Fast, ranked, and conversion-tuned websites engineered to be found and remembered.",
+    featured: false,
+  },
+  {
+    icon: Video,
+    title: "Content Studio",
+    desc: "Strategy-led content production, including short-form video, social creative, and brand storytelling, designed to build authority and drive qualified demand across every channel.",
+    featured: false,
   },
 ];
 
-function DecoDivider({ label, isH2 }: { label?: string; isH2?: boolean }) {
-  const TextTag = isH2 ? "h2" : "span";
-  return (
-    <div className="flex items-center justify-center gap-4 text-gold">
-      <span className="h-px w-16 bg-gradient-to-r from-transparent to-gold/60" />
-      <TextTag className="text-xs uppercase tracking-[0.4em] text-gold-soft">{label ?? "◈"}</TextTag>
-      <span className="h-px w-16 bg-gradient-to-l from-transparent to-gold/60" />
-    </div>
-  );
+// ── Scroll-driven hooks ──────────────────────────────────────────────────────
+
+function useScrollReveal() {
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      document.querySelectorAll("[data-reveal]").forEach((el) => {
+        (el as HTMLElement).style.opacity = "1";
+        (el as HTMLElement).style.transform = "none";
+      });
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("reveal-visible");
+          }
+        });
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+    );
+
+    document.querySelectorAll("[data-reveal]").forEach((el) => {
+      el.classList.add("reveal");
+      observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, []);
 }
 
-function CTAButton({
-  children,
-  href = "#contact",
-  variant = "primary",
-}: {
-  children: React.ReactNode;
-  href?: string;
-  variant?: "primary" | "outline";
-}) {
-  const base =
-    "group relative inline-flex items-center gap-3 px-8 py-4 text-sm uppercase tracking-[0.25em] font-medium transition-all duration-300";
-  if (variant === "outline") {
-    return (
-      <a href={href} className={`${base} border border-gold/50 text-gold-soft hover:bg-gold/10 hover:border-gold`}>
-        {children}
-        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-      </a>
+function useScrollProgress() {
+  useEffect(() => {
+    const bar = document.getElementById("scroll-progress");
+    if (!bar) return;
+
+    const update = () => {
+      const scrolled = window.scrollY;
+      const total = document.documentElement.scrollHeight - window.innerHeight;
+      bar.style.width = total > 0 ? `${(scrolled / total) * 100}%` : "0%";
+    };
+
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
+  }, []);
+}
+
+function useActiveNav() {
+  const [active, setActive] = useState("");
+
+  useEffect(() => {
+    const sections = ["top", "services", "about", "case-studies", "calculator", "contact"];
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActive(entry.target.id);
+          }
+        });
+      },
+      { threshold: 0.4, rootMargin: "-80px 0px 0px 0px" }
     );
-  }
+
+    sections.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  return active;
+}
+
+// ── Sub-components ───────────────────────────────────────────────────────────
+
+function NavLink({
+  href,
+  children,
+  isActive,
+  onClick,
+}: {
+  href: string;
+  children: React.ReactNode;
+  isActive?: boolean;
+  onClick?: () => void;
+}) {
   return (
     <a
       href={href}
-      className={`${base} text-ink shadow-[0_10px_40px_-10px_var(--gold-deep)] hover:shadow-[0_15px_50px_-10px_var(--gold)]`}
-      style={{ background: "var(--gradient-gold)" }}
+      onClick={onClick}
+      className="relative text-sm font-medium transition-colors duration-200"
+      style={{ color: isActive ? "#F4F4F5" : "#71717A" }}
     >
-      <span className="relative z-10 flex items-center gap-3">
-        {children}
-        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-      </span>
+      {children}
+      {isActive && (
+        <span
+          className="absolute -bottom-1 left-0 h-px w-full"
+          style={{ background: "linear-gradient(135deg, #7C5CFF, #4F8CFF)" }}
+        />
+      )}
     </a>
   );
 }
 
-function LandingPage() {
+function PrimaryButton({
+  href,
+  children,
+  className = "",
+}: {
+  href: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
-    <div className="relative min-h-screen overflow-x-hidden">
-      <CursorTrail />
+    <a
+      href={href}
+      className={`group relative inline-flex items-center gap-2 rounded-[12px] px-7 py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:shadow-[0_15px_50px_-10px_rgba(124,92,255,0.65)] hover:-translate-y-0.5 ${className}`}
+      style={{
+        background: "linear-gradient(135deg, #7C5CFF, #4F8CFF)",
+        boxShadow: "0 8px 30px -8px rgba(124,92,255,0.5)",
+      }}
+    >
+      {children}
+      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+    </a>
+  );
+}
 
-      {/* Background deco pattern */}
+function GhostButton({
+  href,
+  children,
+}: {
+  href: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <a
+      href={href}
+      className="group inline-flex items-center gap-2 rounded-[12px] px-7 py-3.5 text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5"
+      style={{
+        color: "#A98BFF",
+        border: "1px solid rgba(124,92,255,0.3)",
+        background: "rgba(124,92,255,0.06)",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.borderColor = "rgba(124,92,255,0.6)";
+        e.currentTarget.style.background = "rgba(124,92,255,0.12)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.borderColor = "rgba(124,92,255,0.3)";
+        e.currentTarget.style.background = "rgba(124,92,255,0.06)";
+      }}
+    >
+      {children}
+      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+    </a>
+  );
+}
+
+function ServiceCard({
+  service,
+  index,
+  featured = false,
+}: {
+  service: (typeof services)[0];
+  index: number;
+  featured?: boolean;
+}) {
+  const cardRef = useRef<HTMLDivElement | null>(null);
+  const Icon = service.icon;
+
+  useEffect(() => {
+    const card = cardRef.current;
+    if (!card) return;
+    if (window.matchMedia("(pointer: coarse)").matches) return;
+
+    const onMouseMove = (e: MouseEvent) => {
+      const rect = card.getBoundingClientRect();
+      card.style.setProperty("--mouse-x", `${e.clientX - rect.left}px`);
+      card.style.setProperty("--mouse-y", `${e.clientY - rect.top}px`);
+    };
+
+    card.addEventListener("mousemove", onMouseMove);
+    return () => card.removeEventListener("mousemove", onMouseMove);
+  }, []);
+
+  return (
+    <div
+      ref={cardRef}
+      className="reveal group relative overflow-hidden rounded-[20px] p-7 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_60px_-15px_rgba(124,92,255,0.25)]"
+      data-reveal
+      style={{
+        background: "rgba(17,17,19,0.7)",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
+        border: "1px solid rgba(255,255,255,0.08)",
+        transitionDelay: `${index * 70}ms`,
+      }}
+    >
+      {/* Cursor-following glow */}
       <div
-        aria-hidden
-        className="pointer-events-none fixed inset-0 opacity-[0.06]"
+        className="pointer-events-none absolute inset-0 rounded-[20px] opacity-0 transition-opacity duration-500 group-hover:opacity-100"
         style={{
-          backgroundImage:
-            "repeating-linear-gradient(45deg, var(--gold) 0 1px, transparent 1px 22px), repeating-linear-gradient(-45deg, var(--gold) 0 1px, transparent 1px 22px)",
+          background:
+            "radial-gradient(280px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(124,92,255,0.09) 0%, transparent 60%)",
         }}
       />
 
-      {/* Nav */}
-      <header className="relative z-20 border-b border-gold/15">
-        <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
+      {/* Top glow */}
+      <div
+        className="absolute -right-10 -top-10 h-28 w-28 rounded-full blur-[40px] transition-opacity duration-500 group-hover:opacity-100"
+        style={{ background: "rgba(124,92,255,0.1)", opacity: 0 }}
+      />
+
+      {/* Icon */}
+      <div
+        className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-[14px] transition-all duration-300 group-hover:scale-110"
+        style={{
+          background: "rgba(124,92,255,0.1)",
+          border: "1px solid rgba(124,92,255,0.2)",
+        }}
+      >
+        <Icon className="h-5 w-5" style={{ color: "#A98BFF" }} />
+      </div>
+
+      <h3 className="mb-3 text-lg font-semibold tracking-tight text-[#F4F4F5]">{service.title}</h3>
+      <p className="text-sm leading-relaxed" style={{ color: "#71717A" }}>
+        {service.desc}
+      </p>
+
+      {/* Bottom accent line */}
+      <div
+        className="mt-5 h-px w-6 transition-all duration-500 group-hover:w-full"
+        style={{ background: "linear-gradient(to right, #7C5CFF, #4F8CFF)" }}
+      />
+    </div>
+  );
+}
+
+// ── Main page ────────────────────────────────────────────────────────────────
+
+function LandingPage() {
+  useScrollReveal();
+  useScrollProgress();
+  const activeSection = useActiveNav();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const heroRef = useRef<HTMLElement | null>(null);
+  const heroTextRef = useRef<HTMLDivElement | null>(null);
+
+  // Subtle hero parallax on scroll
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const hero = heroRef.current;
+    const heroText = heroTextRef.current;
+    if (!hero || !heroText) return;
+
+    const onScroll = () => {
+      const y = window.scrollY;
+      const heroH = hero.offsetHeight;
+      if (y > heroH) return;
+      const pct = y / heroH;
+      heroText.style.transform = `translateY(${y * 0.18}px)`;
+      heroText.style.opacity = `${1 - pct * 1.2}`;
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Lock body scroll when mobile menu open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.classList.add("mobile-menu-open");
+    } else {
+      document.body.classList.remove("mobile-menu-open");
+    }
+    return () => document.body.classList.remove("mobile-menu-open");
+  }, [mobileOpen]);
+
+  const navLinks = [
+    { href: "#services", label: "Services", id: "services" },
+    { href: "#about", label: "About", id: "about" },
+    { href: "#case-studies", label: "Results", id: "case-studies" },
+    { href: "#contact", label: "Contact", id: "contact" },
+  ];
+
+  return (
+    <div className="relative min-h-screen overflow-x-hidden" style={{ background: "#0A0A0B" }}>
+      {/* Scroll progress bar */}
+      <div id="scroll-progress" aria-hidden />
+
+      <CursorTrail />
+
+      {/* Fixed ambient glows */}
+      <div aria-hidden className="pointer-events-none fixed inset-0 z-0">
+        <div
+          className="absolute left-[-20%] top-[-10%] h-[600px] w-[600px] rounded-full"
+          style={{
+            background: "radial-gradient(circle, rgba(124,92,255,0.06) 0%, transparent 65%)",
+            filter: "blur(40px)",
+          }}
+        />
+        <div
+          className="absolute right-[-15%] bottom-[-10%] h-[500px] w-[500px] rounded-full"
+          style={{
+            background: "radial-gradient(circle, rgba(79,140,255,0.04) 0%, transparent 65%)",
+            filter: "blur(40px)",
+          }}
+        />
+      </div>
+
+      {/* ── Navbar ── */}
+      <header
+        className="fixed top-0 left-0 right-0 z-30"
+        style={{
+          background: "rgba(10,10,11,0.75)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
+        }}
+      >
+        <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+          {/* Logo */}
           <a href="#top" className="flex items-center gap-3">
-            <div className="relative flex h-9 w-9 items-center justify-center">
-              <div className="absolute inset-0 rotate-45 border border-gold" />
-              <div className="absolute inset-1 rotate-45 border border-gold/50" />
-              <Sparkles className="relative h-4 w-4 text-gold" />
+            <div
+              className="flex h-8 w-8 items-center justify-center rounded-[10px]"
+              style={{
+                background: "linear-gradient(135deg, #7C5CFF, #4F8CFF)",
+                boxShadow: "0 4px 15px rgba(124,92,255,0.4)",
+              }}
+            >
+              <Sparkles className="h-4 w-4 text-white" />
             </div>
-            <div className="flex flex-col leading-none">
-              <span className="font-display text-xl tracking-wider text-gold-soft">Layer Cake</span>
-              <span className="text-[10px] uppercase tracking-[0.35em] text-muted-foreground">AI</span>
-            </div>
+            <span className="text-base font-semibold tracking-tight text-[#F4F4F5]">
+              Layer Cake <span style={{ color: "#A98BFF" }}>AI</span>
+            </span>
           </a>
-          <div className="hidden items-center gap-8 text-xs uppercase tracking-[0.25em] text-muted-foreground md:flex">
-            <a href="#services" className="hover:text-gold transition-colors">Services</a>
-            <a href="#about" className="hover:text-gold transition-colors">About</a>
-            <a href="#contact" className="hover:text-gold transition-colors">Contact</a>
+
+          {/* Desktop nav */}
+          <div className="hidden items-center gap-8 md:flex">
+            {navLinks.map((link) => (
+              <NavLink
+                key={link.href}
+                href={link.href}
+                isActive={activeSection === link.id}
+              >
+                {link.label}
+              </NavLink>
+            ))}
           </div>
-          <a
-            href={`tel:${PHONE_TEL}`}
-            className="hidden md:inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-gold-soft hover:text-gold"
+
+          {/* Desktop actions */}
+          <div className="hidden items-center gap-4 md:flex">
+            <a
+              href={`tel:${PHONE_TEL}`}
+              className="flex items-center gap-2 text-sm transition-colors hover:text-[#F4F4F5]"
+              style={{ color: "#71717A" }}
+            >
+              <Phone className="h-3.5 w-3.5" />
+              {PHONE}
+            </a>
+            <a
+              href="#contact"
+              className="rounded-full px-5 py-2 text-sm font-semibold text-white transition-all duration-300 hover:shadow-[0_8px_25px_-5px_rgba(124,92,255,0.6)] hover:-translate-y-0.5"
+              style={{
+                background: "linear-gradient(135deg, #7C5CFF, #4F8CFF)",
+                boxShadow: "0 4px 15px rgba(124,92,255,0.35)",
+              }}
+            >
+              Book a Call
+            </a>
+          </div>
+
+          {/* Mobile hamburger */}
+          <button
+            className="flex h-9 w-9 items-center justify-center rounded-[10px] transition-colors md:hidden"
+            style={{ border: "1px solid rgba(255,255,255,0.08)", color: "#F4F4F5" }}
+            onClick={() => setMobileOpen((o) => !o)}
+            aria-label="Toggle menu"
           >
-            <Phone className="h-3.5 w-3.5" />
-            {PHONE}
-          </a>
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
         </nav>
+
+        {/* Mobile menu */}
+        {mobileOpen && (
+          <div
+            className="animate-in slide-in-from-top-2 fade-in duration-200 md:hidden"
+            style={{
+              background: "rgba(10,10,11,0.98)",
+              backdropFilter: "blur(20px)",
+              borderBottom: "1px solid rgba(255,255,255,0.06)",
+            }}
+          >
+            <div className="mx-auto max-w-7xl space-y-1 px-6 py-4">
+              {navLinks.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center rounded-[10px] px-4 py-3 text-sm font-medium transition-colors"
+                  style={{
+                    color: activeSection === link.id ? "#A98BFF" : "#F4F4F5",
+                    background: activeSection === link.id ? "rgba(124,92,255,0.08)" : "transparent",
+                  }}
+                >
+                  {link.label}
+                </a>
+              ))}
+              <div className="pt-3 pb-1 space-y-2">
+                <a
+                  href={`tel:${PHONE_TEL}`}
+                  className="flex w-full items-center gap-2 rounded-[10px] px-4 py-3 text-sm"
+                  style={{ color: "#71717A" }}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <Phone className="h-4 w-4" />
+                  {PHONE}
+                </a>
+                <a
+                  href="#contact"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex w-full items-center justify-center rounded-[10px] px-4 py-3 text-sm font-semibold text-white"
+                  style={{ background: "linear-gradient(135deg, #7C5CFF, #4F8CFF)" }}
+                >
+                  Book a Call
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
-      {/* Hero */}
-      <section id="top" className="relative z-10 mx-auto max-w-7xl px-6 pt-20 pb-28 md:pt-32 md:pb-40">
-        <div className="mx-auto max-w-4xl text-center">
-          <div className="mb-8 inline-flex items-center gap-3 rounded-full border border-gold/30 bg-card/40 px-5 py-2 backdrop-blur">
-            <span className="h-1.5 w-1.5 rounded-full bg-gold animate-pulse-slow" />
-            <span className="text-[11px] uppercase tracking-[0.35em] text-gold-soft">
+      {/* ── Hero ── */}
+      <section
+        id="top"
+        ref={heroRef}
+        className="relative z-10 flex min-h-screen items-center pt-20"
+      >
+        {/* Hero background glow — parallax target handled via heroRef */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse 70% 60% at 50% 40%, rgba(124,92,255,0.09) 0%, rgba(79,140,255,0.04) 40%, transparent 70%)",
+          }}
+        />
+
+        {/* Subtle grid texture */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-[0.025]"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px)",
+            backgroundSize: "60px 60px",
+          }}
+        />
+
+        <div className="mx-auto max-w-7xl px-6 pb-24 pt-16 md:pt-24" ref={heroTextRef}>
+          <div className="mx-auto max-w-4xl text-center">
+            {/* Badge */}
+            <div
+              className="mb-8 inline-flex items-center gap-2.5 rounded-full px-5 py-2 text-xs font-semibold uppercase tracking-widest reveal"
+              data-reveal
+              style={{
+                background: "rgba(124,92,255,0.1)",
+                border: "1px solid rgba(124,92,255,0.25)",
+                color: "#A98BFF",
+              }}
+            >
+              <span
+                className="h-1.5 w-1.5 rounded-full animate-pulse-slow"
+                style={{ background: "#7C5CFF" }}
+              />
               AI Automation Studio
-            </span>
-          </div>
+            </div>
 
-          <h1 className="font-display text-5xl leading-[1.05] md:text-7xl lg:text-8xl">
-            <span className="block text-foreground/90">Automation,</span>
-            <span className="block text-gradient-gold italic">Refined.</span>
-          </h1>
+            {/* Headline */}
+            <h1
+              className="reveal font-bold leading-[1.04] tracking-[-0.03em]"
+              data-reveal
+              style={{
+                fontSize: "clamp(3rem, 8vw, 7rem)",
+                transitionDelay: "80ms",
+              }}
+            >
+              <span className="block text-[#F4F4F5]">Automation,</span>
+              <span
+                className="block"
+                style={{
+                  background: "linear-gradient(135deg, #7C5CFF 0%, #4F8CFF 50%, #A98BFF 100%)",
+                  backgroundClip: "text",
+                  WebkitBackgroundClip: "text",
+                  color: "transparent",
+                }}
+              >
+                Refined.
+              </span>
+            </h1>
 
-          <p className="mx-auto mt-8 max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg">
-            Layer Cake AI engineers intelligent systems that generate leads, book meetings, run
-            campaigns, and grow your business — while you focus on what matters.
-          </p>
+            {/* Subhead */}
+            <p
+              className="reveal mx-auto mt-8 max-w-2xl text-base leading-relaxed md:text-lg"
+              data-reveal
+              style={{ color: "#71717A", transitionDelay: "160ms" }}
+            >
+              Layer Cake AI engineers intelligent systems that generate leads, book meetings, run
+              campaigns, and grow your business — while you focus on what matters.
+            </p>
 
-          <div className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <CTAButton href="#contact">Book a Call</CTAButton>
-            <CTAButton href="#services" variant="outline">
-              Explore Services
-            </CTAButton>
-          </div>
+            {/* CTAs */}
+            <div
+              className="reveal mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row"
+              data-reveal
+              style={{ transitionDelay: "240ms" }}
+            >
+              <PrimaryButton href="#contact">Book a Call</PrimaryButton>
+              <GhostButton href="#services">Explore Services</GhostButton>
+            </div>
 
-          <div className="mt-16">
-            <DecoDivider label="◈  ◈  ◈" />
+            {/* Scroll hint */}
+            <div
+              className="reveal mt-20 flex flex-col items-center gap-2 opacity-40"
+              data-reveal
+              style={{ transitionDelay: "320ms" }}
+            >
+              <div
+                className="h-10 w-6 rounded-full border-2 flex items-start justify-center pt-1.5"
+                style={{ borderColor: "rgba(255,255,255,0.2)" }}
+              >
+                <div
+                  className="h-2 w-1 rounded-full animate-bounce"
+                  style={{ background: "#7C5CFF" }}
+                />
+              </div>
+              <span className="text-[10px] uppercase tracking-[0.3em]" style={{ color: "#71717A" }}>
+                Scroll
+              </span>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Workflow Tester */}
-      <section id="workflow-test" className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 pb-20">
+      {/* ── Workflow Tester ── */}
+      <section
+        id="workflow-test"
+        className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 py-16"
+      >
         <WorkflowTest />
       </section>
 
-      {/* Services */}
-      <section id="services" className="relative z-10 mx-auto max-w-7xl px-6 py-20">
+      {/* ── Services (Bento Grid) ── */}
+      <section id="services" className="relative z-10 mx-auto max-w-7xl px-6 py-24">
         <div className="mb-16 text-center">
-          <h2 className="mb-4 text-xs uppercase tracking-[0.4em] text-gold">— Services —</h2>
-          <p className="font-display text-4xl md:text-6xl">
-            Built for <span className="text-gradient-gold italic">growth.</span>
+          <div
+            className="reveal mb-4 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest"
+            data-reveal
+            style={{
+              background: "rgba(124,92,255,0.1)",
+              border: "1px solid rgba(124,92,255,0.25)",
+              color: "#A98BFF",
+            }}
+          >
+            Services
+          </div>
+          <p
+            className="reveal text-4xl font-bold tracking-[-0.02em] text-[#F4F4F5] md:text-5xl"
+            data-reveal
+            style={{ transitionDelay: "80ms" }}
+          >
+            Built for{" "}
+            <span
+              style={{
+                background: "linear-gradient(135deg, #7C5CFF, #4F8CFF)",
+                backgroundClip: "text",
+                WebkitBackgroundClip: "text",
+                color: "transparent",
+              }}
+            >
+              growth.
+            </span>
           </p>
-          <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
-            Six precision-engineered systems working in concert to compound your revenue.
+          <p
+            className="reveal mx-auto mt-4 max-w-xl text-base"
+            data-reveal
+            style={{ color: "#71717A", transitionDelay: "160ms" }}
+          >
+            Seven precision-engineered systems working in concert to compound your revenue.
           </p>
         </div>
 
-        <div className="grid gap-px overflow-hidden rounded-lg border border-gold/20 bg-gold/20 md:grid-cols-2 lg:grid-cols-3">
-          {services.map((s) => {
-            const Icon = s.icon;
-            return (
+        {/* Bento grid — 7 cards, first one wider on lg */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {/* Featured card — Lead Generation spans 2 cols on lg */}
+          <div className="sm:col-span-2 lg:col-span-2">
+            <div
+              className="reveal group relative h-full overflow-hidden rounded-[20px] p-8 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_60px_-15px_rgba(124,92,255,0.3)]"
+              data-reveal
+              ref={null}
+              style={{
+                background: "rgba(124,92,255,0.07)",
+                border: "1px solid rgba(124,92,255,0.18)",
+              }}
+            >
+              {/* Gradient blob */}
               <div
-                key={s.title}
-                className="group relative bg-card/60 p-8 backdrop-blur transition-all duration-500 hover:bg-card"
+                className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full blur-[60px]"
+                style={{ background: "rgba(124,92,255,0.15)" }}
+              />
+              <div
+                className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-[16px] transition-all duration-300 group-hover:scale-110"
+                style={{
+                  background: "rgba(124,92,255,0.15)",
+                  border: "1px solid rgba(124,92,255,0.3)",
+                }}
               >
-                <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-sm border border-gold/40 bg-ink/60 transition-all duration-500 group-hover:border-gold group-hover:shadow-[0_0_30px_-5px_var(--gold)]">
-                  <Icon className="h-6 w-6 text-gold" />
-                </div>
-                <h3 className="font-display text-2xl text-gold-soft">{s.title}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{s.desc}</p>
-                <div className="mt-6 h-px w-8 bg-gold/60 transition-all duration-500 group-hover:w-full" />
+                <Target className="h-6 w-6" style={{ color: "#A98BFF" }} />
               </div>
-            );
-          })}
+              <div
+                className="mb-2 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-widest"
+                style={{
+                  background: "rgba(124,92,255,0.15)",
+                  color: "#A98BFF",
+                }}
+              >
+                Featured
+              </div>
+              <h3 className="mt-3 text-2xl font-bold tracking-tight text-[#F4F4F5]">
+                Lead Generation
+              </h3>
+              <p className="mt-3 text-base leading-relaxed" style={{ color: "#71717A" }}>
+                AI-driven prospecting that finds, qualifies, and delivers customers directly to your pipeline.
+              </p>
+              <div
+                className="mt-6 h-px w-8 transition-all duration-500 group-hover:w-full"
+                style={{ background: "linear-gradient(to right, #7C5CFF, #4F8CFF)" }}
+              />
+            </div>
+          </div>
+
+          {/* Remaining 6 services */}
+          {services.slice(1).map((service, i) => (
+            <ServiceCard key={service.title} service={service} index={i + 1} />
+          ))}
         </div>
 
-        <div className="mt-16 flex justify-center">
-          <CTAButton href="#contact">Automate My Business</CTAButton>
+        <div className="reveal mt-16 flex justify-center" data-reveal style={{ transitionDelay: "200ms" }}>
+          <PrimaryButton href="#contact">Automate My Business</PrimaryButton>
         </div>
       </section>
 
-      {/* About */}
-      <section id="about" className="relative z-10 mx-auto max-w-5xl px-6 py-24">
-        <DecoDivider label="About" isH2 />
-        <div className="mt-12 grid gap-12 md:grid-cols-5">
+      {/* ── About ── */}
+      <section id="about" className="relative z-10 mx-auto max-w-6xl px-6 py-24">
+        {/* Section label */}
+        <div
+          className="reveal mb-12 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest"
+          data-reveal
+          style={{
+            background: "rgba(124,92,255,0.1)",
+            border: "1px solid rgba(124,92,255,0.25)",
+            color: "#A98BFF",
+          }}
+        >
+          About
+        </div>
+
+        <div className="grid gap-16 md:grid-cols-5">
           <div className="md:col-span-2">
-            <p className="font-display text-4xl md:text-5xl leading-tight">
-              Intelligence,
+            <h2
+              className="reveal text-4xl font-bold leading-tight tracking-[-0.02em] md:text-5xl"
+              data-reveal
+              style={{ transitionDelay: "80ms" }}
+            >
+              <span className="text-[#F4F4F5]">Intelligence,</span>
               <br />
-              <span className="text-gradient-gold italic">layered.</span>
-            </p>
+              <span
+                style={{
+                  background: "linear-gradient(135deg, #7C5CFF, #4F8CFF)",
+                  backgroundClip: "text",
+                  WebkitBackgroundClip: "text",
+                  color: "transparent",
+                }}
+              >
+                layered.
+              </span>
+            </h2>
           </div>
-          <div className="md:col-span-3 space-y-5 text-muted-foreground">
-            <p className="text-lg leading-relaxed">
+
+          <div className="md:col-span-3 space-y-6" style={{ color: "#71717A" }}>
+            <p
+              className="reveal text-lg leading-relaxed"
+              data-reveal
+              style={{ transitionDelay: "120ms" }}
+            >
               We build the invisible infrastructure behind modern businesses — AI systems that
               generate opportunities, capture attention, and convert interest into revenue.
             </p>
-            <p className="leading-relaxed">
-              Every layer is engineered with intention: from the first click to the closed deal.
-              Elegant on the surface, obsessive underneath.
+            <p
+              className="reveal leading-relaxed"
+              data-reveal
+              style={{ transitionDelay: "180ms" }}
+            >
+              Every layer is engineered with intention: from lead generation and booking CRMs to email
+              flows, marketing campaigns, content production, and SEO. Elegant on the surface,
+              obsessive underneath.
             </p>
-            <div className="flex flex-wrap gap-6 pt-4 text-xs uppercase tracking-[0.3em] text-gold-soft">
-              <span>◈ Bespoke</span>
-              <span>◈ Data-Driven</span>
-              <span>◈ Always-On</span>
+
+            {/* Pillars */}
+            <div
+              className="reveal flex flex-wrap gap-3 pt-2"
+              data-reveal
+              style={{ transitionDelay: "240ms" }}
+            >
+              {["Bespoke", "Data-Driven", "Always-On"].map((tag) => (
+                <span
+                  key={tag}
+                  className="rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-wider"
+                  style={{
+                    background: "rgba(124,92,255,0.08)",
+                    border: "1px solid rgba(124,92,255,0.2)",
+                    color: "#A98BFF",
+                  }}
+                >
+                  {tag}
+                </span>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Case Studies */}
-      <section id="case-studies" className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 py-24">
+      {/* ── Case Studies ── */}
+      <section
+        id="case-studies"
+        className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 py-24"
+      >
         <CaseStudies />
       </section>
 
-      {/* ROI Calculator */}
-      <section id="calculator" className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 py-12">
+      {/* ── ROI Calculator ── */}
+      <section
+        id="calculator"
+        className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 py-16"
+      >
         <RoiCalculator />
       </section>
 
-      {/* Contact / Final CTA */}
-      <section id="contact" className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 py-16 sm:py-24 overflow-x-hidden">
-        <div className="deco-corners relative rounded-lg border border-gold/40 bg-card/50 backdrop-blur overflow-hidden">
-          <div className="deco-corner-tl" />
-          <div className="deco-corner-tr" />
-          <div className="deco-corner-bl" />
-          <div className="deco-corner-br" />
-
+      {/* ── Contact ── */}
+      <section
+        id="contact"
+        className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 py-16 sm:py-24 overflow-x-hidden"
+      >
+        <div
+          className="reveal relative overflow-hidden rounded-[24px]"
+          data-reveal
+          style={{
+            background: "rgba(17,17,19,0.7)",
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
+            border: "1px solid rgba(124,92,255,0.18)",
+            boxShadow: "0 30px 80px -20px rgba(0,0,0,0.6), 0 0 60px -30px rgba(124,92,255,0.2)",
+          }}
+        >
+          {/* Background glow */}
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 opacity-40"
-            style={{ background: "var(--gradient-radial)" }}
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background:
+                "radial-gradient(circle at 50% 0%, rgba(124,92,255,0.1) 0%, transparent 60%)",
+            }}
           />
 
-          {/* Header — centered text block */}
-          <div className="relative text-center px-5 pt-8 sm:pt-12 sm:px-10 md:px-16">
-            <h2 className="mb-4 text-xs uppercase tracking-[0.4em] text-gold">— Contact —</h2>
-            <p className="font-display text-3xl sm:text-4xl md:text-6xl">
-              Ready to <span className="text-gradient-gold italic">automate?</span>
+          {/* Header */}
+          <div className="relative text-center px-5 pt-10 sm:pt-14 sm:px-10 md:px-16">
+            <div
+              className="mb-5 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest"
+              style={{
+                background: "rgba(124,92,255,0.1)",
+                border: "1px solid rgba(124,92,255,0.25)",
+                color: "#A98BFF",
+              }}
+            >
+              Contact
+            </div>
+            <p className="text-3xl font-bold tracking-[-0.02em] text-[#F4F4F5] sm:text-4xl md:text-5xl">
+              Ready to{" "}
+              <span
+                style={{
+                  background: "linear-gradient(135deg, #7C5CFF, #4F8CFF)",
+                  backgroundClip: "text",
+                  WebkitBackgroundClip: "text",
+                  color: "transparent",
+                }}
+              >
+                automate?
+              </span>
             </p>
-            <p className="mx-auto mt-6 max-w-xl text-muted-foreground text-sm sm:text-base">
+            <p
+              className="mx-auto mt-5 max-w-xl text-sm sm:text-base"
+              style={{ color: "#71717A" }}
+            >
               Book a discovery call and we'll map out an automation blueprint tailored to your
               business — no fluff, just leverage.
             </p>
           </div>
 
-          {/* Cal.com embed — full-width, no side padding on mobile */}
+          {/* Cal embed */}
           <div className="relative mt-8 px-3 sm:px-6 md:px-10">
             <CalEmbed />
           </div>
 
-          {/* CTA buttons + contact info */}
-          <div className="relative px-5 pb-8 pt-6 sm:px-10 sm:pb-12 md:px-16 text-center">
+          {/* CTA + contact info */}
+          <div className="relative px-5 pb-10 pt-6 sm:px-10 sm:pb-14 md:px-16 text-center">
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <CTAButton href="#contact">
-                Book a Call
-              </CTAButton>
+              <PrimaryButton href="#contact">Book a Call</PrimaryButton>
             </div>
 
-            <div className="mt-10 grid gap-6 border-t border-gold/20 pt-8 text-sm sm:grid-cols-3">
-              <div className="flex flex-col items-center gap-2">
-                <Phone className="h-4 w-4 text-gold" />
-                <span className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Phone</span>
-                <a href={`tel:${PHONE_TEL}`} className="text-gold-soft hover:text-gold">
-                  {PHONE}
-                </a>
-              </div>
-              <div className="flex flex-col items-center gap-2">
-                <Mail className="h-4 w-4 text-gold" />
-                <span className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Book</span>
-                <a href="#contact" className="text-gold-soft hover:text-gold">
-                  Directly on Calendar
-                </a>
-              </div>
-              <div className="flex flex-col items-center gap-2">
-                <MapPin className="h-4 w-4 text-gold" />
-                <span className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Web</span>
-                <span className="text-gold-soft">layercakehq.com</span>
-              </div>
+            <div
+              className="mt-10 grid gap-6 pt-8 text-sm sm:grid-cols-3"
+              style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+            >
+              {[
+                { icon: Phone, label: "Phone", value: PHONE, href: `tel:${PHONE_TEL}` },
+                { icon: Mail, label: "Book", value: "Directly on Calendar", href: "#contact" },
+                { icon: MapPin, label: "Web", value: "layercakehq.com", href: undefined },
+              ].map(({ icon: Icon, label, value, href }) => (
+                <div key={label} className="flex flex-col items-center gap-2">
+                  <Icon className="h-4 w-4" style={{ color: "#7C5CFF" }} />
+                  <span
+                    className="text-xs uppercase tracking-[0.25em]"
+                    style={{ color: "#71717A" }}
+                  >
+                    {label}
+                  </span>
+                  {href ? (
+                    <a
+                      href={href}
+                      className="transition-colors hover:text-[#F4F4F5]"
+                      style={{ color: "#A98BFF" }}
+                    >
+                      {value}
+                    </a>
+                  ) : (
+                    <span style={{ color: "#A98BFF" }}>{value}</span>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="relative z-10 border-t border-gold/15 py-10">
+      {/* ── Footer ── */}
+      <footer
+        className="relative z-10 py-10"
+        style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+      >
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 md:flex-row">
           <div className="flex items-center gap-3">
-            <div className="relative flex h-7 w-7 items-center justify-center">
-              <div className="absolute inset-0 rotate-45 border border-gold/60" />
-              <Sparkles className="relative h-3 w-3 text-gold" />
+            <div
+              className="flex h-7 w-7 items-center justify-center rounded-[8px]"
+              style={{ background: "linear-gradient(135deg, #7C5CFF, #4F8CFF)" }}
+            >
+              <Sparkles className="h-3.5 w-3.5 text-white" />
             </div>
-            <span className="font-display tracking-wider text-gold-soft">Layer Cake AI</span>
+            <span className="font-semibold tracking-tight text-[#F4F4F5]">Layer Cake AI</span>
           </div>
-          <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+          <p
+            className="text-xs uppercase tracking-[0.3em]"
+            style={{ color: "#71717A" }}
+          >
             © {new Date().getFullYear()} — Automation, Refined.
           </p>
         </div>
       </footer>
+
       <ChatWidget />
     </div>
   );

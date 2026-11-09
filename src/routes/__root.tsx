@@ -81,18 +81,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "Layer Cake AI builds intelligent automation — lead generation, booking CRMs, email flows, marketing campaigns, and SEO — so your business runs itself.",
+          "Layer Cake AI builds intelligent automation — lead generation, booking CRMs, email flows, marketing campaigns, content production, and SEO — so your business runs itself.",
       },
       { name: "author", content: "Layer Cake AI" },
       { property: "og:title", content: "Layer Cake AI — AI Automation for Modern Businesses" },
       {
         property: "og:description",
-        content: "Layer Cake AI builds intelligent automation — lead generation, booking CRMs, email flows, marketing campaigns, and SEO — so your business runs itself.",
+        content: "Layer Cake AI builds intelligent automation — lead generation, booking CRMs, email flows, marketing campaigns, content production, and SEO — so your business runs itself.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Layer Cake AI — AI Automation for Modern Businesses" },
-      { name: "twitter:description", content: "Layer Cake AI builds intelligent automation — lead generation, booking CRMs, email flows, marketing campaigns, and SEO — so your business runs itself." },
+      { name: "twitter:description", content: "Layer Cake AI builds intelligent automation — lead generation, booking CRMs, email flows, marketing campaigns, content production, and SEO — so your business runs itself." },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/44478b2c-da07-4ffd-b9d2-b26f5ef88255/id-preview-d9e48c5c--4053e8b0-336a-4adf-b780-6d5e51525a88.lovable.app-1784139281259.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/44478b2c-da07-4ffd-b9d2-b26f5ef88255/id-preview-d9e48c5c--4053e8b0-336a-4adf-b780-6d5e51525a88.lovable.app-1784139281259.png" },
     ],
@@ -102,7 +102,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap",
       },
       { rel: "icon", href: "/favicon.png?v=2", type: "image/png" },
       { rel: "icon", href: "/favicon.ico?v=2", type: "image/x-icon" },

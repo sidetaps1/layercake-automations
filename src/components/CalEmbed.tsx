@@ -56,9 +56,9 @@ export function CalEmbed() {
         calLink: "matt-m-l3939q/30min",
         cssVarsPerTheme: {
           dark: {
-            "cal-brand": "#c5a059",
-            "cal-text-emphasis": "#ffffff",
-            "cal-text-muted": "#a0a0a0",
+            "cal-brand": "#7C5CFF",
+            "cal-text-emphasis": "#F4F4F5",
+            "cal-text-muted": "#71717A",
           },
         },
       });
@@ -69,9 +69,9 @@ export function CalEmbed() {
         css: "https://layercakehq.com/cal-custom.css",
         cssVarsPerTheme: {
           dark: {
-            "cal-brand": "#c5a059",
-            "cal-text-emphasis": "#ffffff",
-            "cal-text-muted": "#a0a0a0",
+            "cal-brand": "#7C5CFF",
+            "cal-text-emphasis": "#F4F4F5",
+            "cal-text-muted": "#71717A",
           },
         },
       });
@@ -79,7 +79,16 @@ export function CalEmbed() {
   }, []);
 
   return (
-    <div className="w-full rounded-xl border border-gold/30 bg-card/80 shadow-2xl backdrop-blur overflow-x-hidden">
+    <div
+      className="w-full overflow-x-hidden rounded-[16px]"
+      style={{
+        border: "1px solid rgba(124,92,255,0.2)",
+        background: "rgba(17,17,19,0.6)",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
+        boxShadow: "0 20px 60px -15px rgba(0,0,0,0.5)",
+      }}
+    >
       <div
         id="my-cal-inline-30min"
         style={{ width: "100%", height: "100%", minHeight: "600px", overflowY: "auto", overflowX: "hidden" }}

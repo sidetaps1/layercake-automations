@@ -1,15 +1,28 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Modern cursor spotlight — an Aurora-themed layered radial glow
- * that follows the mouse and dynamically lights the background.
+ * CursorTrail — accent-colored spotlight that follows the mouse.
+ *
+ * Features:
+ * - Three-layer lerp (core ring, mid glow, ambient aura)
+ * - Violet/indigo gradient to match modern theme
+ * - Scales up when hovering interactive elements
+ * - mix-blend-mode: screen for intentional feel
+ * - Disabled on touch devices & prefers-reduced-motion
+ * - pointer-events: none — never blocks clicks
  */
 export function CursorTrail() {
   const coreRef = useRef<HTMLDivElement | null>(null);
   const glowRef = useRef<HTMLDivElement | null>(null);
   const auraRef = useRef<HTMLDivElement | null>(null);
+  const scaleRef = useRef(1);
 
   useEffect(() => {
+    // Disable on touch-only devices
+    if (window.matchMedia("(pointer: coarse)").matches) return;
+    // Disable if user prefers reduced motion
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
     const core = coreRef.current;
     const glow = glowRef.current;
     const aura = auraRef.current;
@@ -17,37 +30,50 @@ export function CursorTrail() {
 
     let targetX = window.innerWidth / 2;
     let targetY = window.innerHeight / 2;
-    
-    let coreX = targetX;
-    let coreY = targetY;
-    let glowX = targetX;
-    let glowY = targetY;
-    let auraX = targetX;
-    let auraY = targetY;
+
+    let coreX = targetX, coreY = targetY;
+    let glowX = targetX, glowY = targetY;
+    let auraX = targetX, auraY = targetY;
 
     const onMove = (e: MouseEvent) => {
       targetX = e.clientX;
       targetY = e.clientY;
     };
 
+    const onEnterInteractive = () => {
+      scaleRef.current = 1.8;
+    };
+    const onLeaveInteractive = () => {
+      scaleRef.current = 1;
+    };
+
+    // Attach scale listeners to all interactive elements
+    const interactive = document.querySelectorAll("a, button, [role='button'], input, label, select, textarea");
+    interactive.forEach((el) => {
+      el.addEventListener("mouseenter", onEnterInteractive);
+      el.addEventListener("mouseleave", onLeaveInteractive);
+    });
+
     let raf = 0;
     const tick = () => {
-      // Core tracks very closely
-      coreX += (targetX - coreX) * 0.35;
-      coreY += (targetY - coreY) * 0.35;
-      
-      // Glow tracks moderately fast
-      glowX += (targetX - glowX) * 0.18;
-      glowY += (targetY - glowY) * 0.18;
-      
-      // Ambient aura drifts more slowly for a layered, fluid feel
-      auraX += (targetX - auraX) * 0.06;
-      auraY += (targetY - auraY) * 0.06;
+      const s = scaleRef.current;
 
-      core.style.transform = `translate3d(${coreX}px, ${coreY}px, 0) translate(-50%, -50%)`;
-      glow.style.transform = `translate3d(${glowX}px, ${glowY}px, 0) translate(-50%, -50%)`;
+      // Core: fast tracking, tight
+      coreX += (targetX - coreX) * 0.3;
+      coreY += (targetY - coreY) * 0.3;
+
+      // Glow: moderate
+      glowX += (targetX - glowX) * 0.14;
+      glowY += (targetY - glowY) * 0.14;
+
+      // Aura: slow drift
+      auraX += (targetX - auraX) * 0.055;
+      auraY += (targetY - auraY) * 0.055;
+
+      core.style.transform = `translate3d(${coreX}px, ${coreY}px, 0) translate(-50%, -50%) scale(${s})`;
+      glow.style.transform = `translate3d(${glowX}px, ${glowY}px, 0) translate(-50%, -50%) scale(${s * 0.85})`;
       aura.style.transform = `translate3d(${auraX}px, ${auraY}px, 0) translate(-50%, -50%)`;
-      
+
       raf = requestAnimationFrame(tick);
     };
 
@@ -57,36 +83,51 @@ export function CursorTrail() {
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("mousemove", onMove);
+      interactive.forEach((el) => {
+        el.removeEventListener("mouseenter", onEnterInteractive);
+        el.removeEventListener("mouseleave", onLeaveInteractive);
+      });
     };
   }, []);
 
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-      {/* Large ambient aura — slow-moving, wide deep violet/magenta */}
+    <div aria-hidden className="pointer-events-none fixed inset-0 z-[1] overflow-hidden">
+      {/* Large ambient aura — slow drift, wide violet */}
       <div
         ref={auraRef}
-        className="absolute left-0 top-0 h-[1000px] w-[1000px] rounded-full opacity-60 mix-blend-screen blur-3xl"
+        className="absolute left-0 top-0 h-[900px] w-[900px] rounded-full"
         style={{
           background:
-            "radial-gradient(circle, oklch(0.5 0.25 310 / 0.35) 0%, oklch(0.5 0.25 310 / 0.15) 30%, transparent 65%)",
+            "radial-gradient(circle, rgba(124,92,255,0.12) 0%, rgba(79,140,255,0.06) 35%, transparent 65%)",
+          mixBlendMode: "screen",
+          filter: "blur(60px)",
+          opacity: 0.7,
         }}
       />
-      {/* Mid glow — moderately-paced vibrant cyan */}
+      {/* Mid glow — moderately-paced indigo */}
       <div
         ref={glowRef}
-        className="absolute left-0 top-0 h-[450px] w-[450px] rounded-full opacity-80 mix-blend-screen blur-2xl"
+        className="absolute left-0 top-0 h-[380px] w-[380px] rounded-full"
         style={{
           background:
-            "radial-gradient(circle, oklch(0.7 0.2 240 / 0.5) 0%, oklch(0.7 0.2 240 / 0.2) 35%, transparent 70%)",
+            "radial-gradient(circle, rgba(124,92,255,0.22) 0%, rgba(79,140,255,0.1) 40%, transparent 70%)",
+          mixBlendMode: "screen",
+          filter: "blur(28px)",
+          opacity: 0.85,
+          transition: "transform 0.15s cubic-bezier(0.16,1,0.3,1)",
         }}
       />
-      {/* Core spark — tight, bright white/cyan tracking quickly */}
+      {/* Core ring — tight, bright, tracks quickly */}
       <div
         ref={coreRef}
-        className="absolute left-0 top-0 h-[150px] w-[150px] rounded-full opacity-90 mix-blend-screen blur-xl"
+        className="absolute left-0 top-0 h-[100px] w-[100px] rounded-full"
         style={{
           background:
-            "radial-gradient(circle, oklch(0.95 0.05 240 / 0.8) 0%, transparent 50%)",
+            "radial-gradient(circle, rgba(169,139,255,0.5) 0%, rgba(124,92,255,0.15) 50%, transparent 70%)",
+          mixBlendMode: "screen",
+          filter: "blur(8px)",
+          opacity: 0.9,
+          transition: "transform 0.1s cubic-bezier(0.16,1,0.3,1)",
         }}
       />
     </div>
