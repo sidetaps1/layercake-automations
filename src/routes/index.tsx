@@ -91,10 +91,11 @@ function useScrollReveal() {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add("reveal-visible");
+            observer.unobserve(entry.target);
           }
         });
       },
-      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+      { threshold: 0.05, rootMargin: "0px 0px 40px 0px" }
     );
 
     document.querySelectorAll("[data-reveal]").forEach((el) => {
@@ -265,13 +266,15 @@ function ServiceCard({
   return (
     <div
       ref={cardRef}
-      className="reveal group relative overflow-hidden rounded-[20px] p-7 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_60px_-15px_rgba(124,92,255,0.25)]"
+      className={`reveal group relative overflow-hidden rounded-[20px] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_60px_-15px_rgba(124,92,255,0.3)] ${
+        featured ? "sm:col-span-2 lg:col-span-2 p-8 md:p-10" : "p-7"
+      }`}
       data-reveal
       style={{
-        background: "rgba(17,17,19,0.7)",
+        background: featured ? "rgba(124,92,255,0.06)" : "rgba(17,17,19,0.7)",
         backdropFilter: "blur(16px)",
         WebkitBackdropFilter: "blur(16px)",
-        border: "1px solid rgba(255,255,255,0.08)",
+        border: featured ? "1px solid rgba(124,92,255,0.2)" : "1px solid rgba(255,255,255,0.08)",
         transitionDelay: `${index * 70}ms`,
       }}
     >
@@ -280,35 +283,58 @@ function ServiceCard({
         className="pointer-events-none absolute inset-0 rounded-[20px] opacity-0 transition-opacity duration-500 group-hover:opacity-100"
         style={{
           background:
-            "radial-gradient(280px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(124,92,255,0.09) 0%, transparent 60%)",
+            "radial-gradient(320px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(124,92,255,0.12) 0%, transparent 60%)",
         }}
       />
 
       {/* Top glow */}
       <div
-        className="absolute -right-10 -top-10 h-28 w-28 rounded-full blur-[40px] transition-opacity duration-500 group-hover:opacity-100"
-        style={{ background: "rgba(124,92,255,0.1)", opacity: 0 }}
+        className="absolute -right-10 -top-10 h-32 w-32 rounded-full blur-[50px] transition-opacity duration-500 group-hover:opacity-100"
+        style={{ background: "rgba(124,92,255,0.15)", opacity: featured ? 0.6 : 0 }}
       />
 
-      {/* Icon */}
-      <div
-        className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-[14px] transition-all duration-300 group-hover:scale-110"
-        style={{
-          background: "rgba(124,92,255,0.1)",
-          border: "1px solid rgba(124,92,255,0.2)",
-        }}
-      >
-        <Icon className="h-5 w-5" style={{ color: "#A98BFF" }} />
+      {/* Icon + Tag */}
+      <div className="flex items-center justify-between mb-5">
+        <div
+          className="inline-flex h-12 w-12 items-center justify-center rounded-[14px] transition-all duration-300 group-hover:scale-110"
+          style={{
+            background: "rgba(124,92,255,0.12)",
+            border: "1px solid rgba(124,92,255,0.25)",
+          }}
+        >
+          <Icon className="h-5 w-5" style={{ color: "#A98BFF" }} />
+        </div>
+        {featured && (
+          <span
+            className="rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-widest"
+            style={{
+              background: "rgba(124,92,255,0.15)",
+              border: "1px solid rgba(124,92,255,0.3)",
+              color: "#A98BFF",
+            }}
+          >
+            Featured
+          </span>
+        )}
       </div>
 
-      <h3 className="mb-3 text-lg font-semibold tracking-tight text-[#F4F4F5]">{service.title}</h3>
-      <p className="text-sm leading-relaxed" style={{ color: "#71717A" }}>
+      <h3
+        className={`mb-3 font-semibold tracking-tight text-[#F4F4F5] ${
+          featured ? "text-2xl" : "text-lg"
+        }`}
+      >
+        {service.title}
+      </h3>
+      <p
+        className={`leading-relaxed ${featured ? "text-base max-w-xl" : "text-sm"}`}
+        style={{ color: "#71717A" }}
+      >
         {service.desc}
       </p>
 
       {/* Bottom accent line */}
       <div
-        className="mt-5 h-px w-6 transition-all duration-500 group-hover:w-full"
+        className="mt-6 h-px w-8 transition-all duration-500 group-hover:w-full"
         style={{ background: "linear-gradient(to right, #7C5CFF, #4F8CFF)" }}
       />
     </div>
@@ -673,56 +699,13 @@ function LandingPage() {
 
         {/* Bento grid — 7 cards, first one wider on lg */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {/* Featured card — Lead Generation spans 2 cols on lg */}
-          <div className="sm:col-span-2 lg:col-span-2">
-            <div
-              className="reveal group relative h-full overflow-hidden rounded-[20px] p-8 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_60px_-15px_rgba(124,92,255,0.3)]"
-              data-reveal
-              ref={null}
-              style={{
-                background: "rgba(124,92,255,0.07)",
-                border: "1px solid rgba(124,92,255,0.18)",
-              }}
-            >
-              {/* Gradient blob */}
-              <div
-                className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full blur-[60px]"
-                style={{ background: "rgba(124,92,255,0.15)" }}
-              />
-              <div
-                className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-[16px] transition-all duration-300 group-hover:scale-110"
-                style={{
-                  background: "rgba(124,92,255,0.15)",
-                  border: "1px solid rgba(124,92,255,0.3)",
-                }}
-              >
-                <Target className="h-6 w-6" style={{ color: "#A98BFF" }} />
-              </div>
-              <div
-                className="mb-2 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-widest"
-                style={{
-                  background: "rgba(124,92,255,0.15)",
-                  color: "#A98BFF",
-                }}
-              >
-                Featured
-              </div>
-              <h3 className="mt-3 text-2xl font-bold tracking-tight text-[#F4F4F5]">
-                Lead Generation
-              </h3>
-              <p className="mt-3 text-base leading-relaxed" style={{ color: "#71717A" }}>
-                AI-driven prospecting that finds, qualifies, and delivers customers directly to your pipeline.
-              </p>
-              <div
-                className="mt-6 h-px w-8 transition-all duration-500 group-hover:w-full"
-                style={{ background: "linear-gradient(to right, #7C5CFF, #4F8CFF)" }}
-              />
-            </div>
-          </div>
-
-          {/* Remaining 6 services */}
-          {services.slice(1).map((service, i) => (
-            <ServiceCard key={service.title} service={service} index={i + 1} />
+          {services.map((service, i) => (
+            <ServiceCard
+              key={service.title}
+              service={service}
+              index={i}
+              featured={service.featured}
+            />
           ))}
         </div>
 

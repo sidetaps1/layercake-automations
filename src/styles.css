@@ -113,10 +113,10 @@
 }
 
 /* ── Noise texture overlay ── */
-@utility bg-noise {
+.bg-noise {
   position: relative;
 }
-@utility bg-noise::before {
+.bg-noise::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -128,15 +128,8 @@
 }
 
 /* ── Violet gradient text ── */
-@utility text-gradient-violet {
-  background: var(--gradient-violet);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-}
-
-/* Keep legacy classes working */
-@utility text-gradient-gold {
+.text-gradient-violet,
+.text-gradient-gold {
   background: var(--gradient-violet);
   background-clip: text;
   -webkit-background-clip: text;
@@ -144,7 +137,7 @@
 }
 
 /* ── Glassmorphism card ── */
-@utility glass-card {
+.glass-card {
   background: rgba(17,17,19,0.7);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -153,14 +146,14 @@
 }
 
 /* ── Scroll-reveal base ── */
-@utility reveal {
+.reveal {
   opacity: 0;
-  transform: translateY(28px);
+  transform: translateY(24px);
   transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
-@utility reveal-visible {
-  opacity: 1;
-  transform: none;
+.reveal-visible {
+  opacity: 1 !important;
+  transform: none !important;
 }
 
 /* ── Scroll progress bar ── */
@@ -198,10 +191,10 @@
   50% { box-shadow: 0 0 40px rgba(124,92,255,0.5); }
 }
 
-@utility animate-pulse-slow {
+.animate-pulse-slow {
   animation: pulse-slow 3s ease-in-out infinite;
 }
-@utility animate-glow-pulse {
+.animate-glow-pulse {
   animation: glow-pulse 3s ease-in-out infinite;
 }
 
