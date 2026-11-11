@@ -484,7 +484,7 @@ export function MembraneHero() {
               className="text-[11px] font-bold tracking-wide text-white/55 md:text-[13px]"
               style={{ fontFamily: "var(--font-playfair)" }}
             >
-              #1 Interactive Section
+              #1 Rated AI Automation Studio
             </span>
             <div className="mt-1 flex items-center gap-1">
               {[0, 1, 2, 3, 4].map((i) => (
@@ -519,19 +519,19 @@ export function MembraneHero() {
             fontSize: "clamp(3.2rem, 8vw, 6.5rem)",
           }}
         >
-          Touch the{" "}
+          The business that runs{" "}
           <span className="inline-block cursor-default text-white/40 transition-colors duration-500 hover:text-white pointer-events-auto">
-            invisible
+            itself.
           </span>
         </h1>
 
         {/* Subtitle */}
         <p
           data-reveal
-          className="mx-auto mt-5 max-w-[24rem] text-[14px] leading-relaxed text-white/25 select-text"
+          className="mx-auto mt-5 max-w-[32rem] text-[14px] leading-relaxed text-white/35 select-text"
           style={{ fontFamily: "var(--font-geist)" }}
         >
-          A living surface that responds to your presence. Move your cursor. Click to press deeper.
+          We engineer precision AI workflows — qualified lead pipelines, booking CRMs, nurture sequences, and marketing engines — so you close more deals with zero manual friction.
         </p>
 
         {/* Buttons */}
@@ -541,16 +541,16 @@ export function MembraneHero() {
           style={{ fontFamily: "var(--font-geist)" }}
         >
           <a
-            href="#services"
+            href="#contact"
             className="pointer-events-auto inline-flex items-center justify-center rounded-full bg-white px-[28px] py-[10px] text-[13px] font-medium text-[#08080a] transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] hover:shadow-[0_0_40px_rgba(255,255,255,0.1)]"
           >
-            Get this section
+            Book a Strategy Call
           </a>
           <a
-            href="#workflow-test"
+            href="#services"
             className="pointer-events-auto inline-flex items-center justify-center rounded-full bg-[#18181b] border border-white/10 px-[28px] py-[10px] text-[13px] font-medium text-white/50 transition-all duration-200 hover:border-white/20 hover:text-white/70"
           >
-            View code
+            Explore Systems
           </a>
         </div>
 
@@ -565,14 +565,14 @@ export function MembraneHero() {
               <img
                 key={i}
                 src={src}
-                alt="Member avatar"
+                alt="Client avatar"
                 className="h-[28px] w-[28px] rounded-full border-[1.5px] border-[#08080a] object-cover"
                 loading="lazy"
               />
             ))}
           </div>
           <span className="text-[12px] font-normal text-white/35">
-            <span className="font-medium text-white/50">2,400+</span> creators joined
+            <span className="font-medium text-white/50">350+</span> systems automated & scaled
           </span>
         </div>
       </div>
