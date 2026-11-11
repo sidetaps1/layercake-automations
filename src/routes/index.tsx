@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { MembraneHero } from "@/components/MembraneHero";
 import { CursorTrail } from "@/components/CursorTrail";
 import { CalEmbed } from "@/components/CalEmbed";
 import { RoiCalculator } from "@/components/RoiCalculator";
@@ -101,6 +102,7 @@ function useScrollReveal() {
     );
 
     document.querySelectorAll("[data-reveal]").forEach((el) => {
+      if (el.closest("#top")) return;
       el.classList.add("reveal");
       observer.observe(el);
     });
@@ -351,48 +353,6 @@ function LandingPage() {
   const activeSection = useActiveNav();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Dynamic hero value word rotator
-  const rotatingWords = ["Refined.", "Scaled.", "Optimized.", "Accelerated."];
-  const [wordIndex, setWordIndex] = useState(0);
-  const [isFading, setIsFading] = useState(false);
-
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const interval = setInterval(() => {
-      setIsFading(true);
-      setTimeout(() => {
-        setWordIndex((prev) => (prev + 1) % rotatingWords.length);
-        setIsFading(false);
-      }, 280);
-    }, 2800);
-
-    return () => clearInterval(interval);
-  }, [rotatingWords.length]);
-
-  const heroRef = useRef<HTMLElement | null>(null);
-  const heroTextRef = useRef<HTMLDivElement | null>(null);
-
-  // Subtle hero parallax on scroll
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    const hero = heroRef.current;
-    const heroText = heroTextRef.current;
-    if (!hero || !heroText) return;
-
-    const onScroll = () => {
-      const y = window.scrollY;
-      const heroH = hero.offsetHeight;
-      if (y > heroH) return;
-      const pct = y / heroH;
-      heroText.style.transform = `translateY(${y * 0.18}px)`;
-      heroText.style.opacity = `${1 - pct * 1.2}`;
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   // Lock body scroll when mobile menu open
   useEffect(() => {
     if (mobileOpen) {
@@ -557,119 +517,8 @@ function LandingPage() {
         )}
       </header>
 
-      {/* ── Hero ── */}
-      <section
-        id="top"
-        ref={heroRef}
-        className="relative z-10 flex min-h-screen items-center pt-20"
-      >
-        {/* Hero background glow — parallax target handled via heroRef */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(ellipse 70% 60% at 50% 40%, rgba(124,92,255,0.09) 0%, rgba(79,140,255,0.04) 40%, transparent 70%)",
-          }}
-        />
-
-        {/* Subtle grid texture */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-[0.025]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px)",
-            backgroundSize: "60px 60px",
-          }}
-        />
-
-        <div className="mx-auto max-w-7xl px-6 pb-24 pt-16 md:pt-24" ref={heroTextRef}>
-          <div className="mx-auto max-w-4xl text-center">
-            {/* Badge */}
-            <div
-              className="mb-8 inline-flex items-center gap-2.5 rounded-full px-5 py-2 text-xs font-semibold uppercase tracking-widest reveal"
-              data-reveal
-              style={{
-                background: "rgba(124,92,255,0.1)",
-                border: "1px solid rgba(124,92,255,0.25)",
-                color: "#A98BFF",
-              }}
-            >
-              <span
-                className="h-1.5 w-1.5 rounded-full animate-pulse-slow"
-                style={{ background: "#7C5CFF" }}
-              />
-              AI Automation Studio
-            </div>
-
-            {/* Headline */}
-            <h1
-              className="reveal font-bold leading-[1.04] tracking-[-0.03em]"
-              data-reveal
-              style={{
-                fontSize: "clamp(3rem, 8vw, 7rem)",
-                transitionDelay: "80ms",
-              }}
-            >
-              <span className="block text-[#F4F4F5]">Automation,</span>
-              <span
-                className="inline-block transition-all duration-300 ease-out"
-                style={{
-                  background: "linear-gradient(135deg, #7C5CFF 0%, #4F8CFF 50%, #A98BFF 100%)",
-                  backgroundClip: "text",
-                  WebkitBackgroundClip: "text",
-                  color: "transparent",
-                  opacity: isFading ? 0 : 1,
-                  transform: isFading ? "translateY(8px)" : "translateY(0px)",
-                }}
-              >
-                {rotatingWords[wordIndex]}
-              </span>
-            </h1>
-
-            {/* Subhead */}
-            <p
-              className="reveal mx-auto mt-8 max-w-2xl text-base leading-relaxed md:text-lg"
-              data-reveal
-              style={{ color: "#71717A", transitionDelay: "160ms" }}
-            >
-              Layer Cake AI engineers intelligent systems that generate leads, book meetings, run
-              campaigns, and grow your business — while you focus on what matters.
-            </p>
-
-            {/* CTAs */}
-            <div
-              className="reveal mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row"
-              data-reveal
-              style={{ transitionDelay: "240ms" }}
-            >
-              <PrimaryButton href="#contact">Book a Call</PrimaryButton>
-              <GhostButton href="#services">Explore Services</GhostButton>
-            </div>
-
-            {/* Scroll hint */}
-            <div
-              className="reveal mt-20 flex flex-col items-center gap-2 opacity-40"
-              data-reveal
-              style={{ transitionDelay: "320ms" }}
-            >
-              <div
-                className="h-10 w-6 rounded-full border-2 flex items-start justify-center pt-1.5"
-                style={{ borderColor: "rgba(255,255,255,0.2)" }}
-              >
-                <div
-                  className="h-2 w-1 rounded-full animate-bounce"
-                  style={{ background: "#7C5CFF" }}
-                />
-              </div>
-              <span className="text-[10px] uppercase tracking-[0.3em]" style={{ color: "#71717A" }}>
-                Scroll
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* ── Membrane Hero Section ── */}
+      <MembraneHero />
 
       {/* ── Workflow Tester ── */}
       <section
